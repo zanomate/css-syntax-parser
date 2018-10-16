@@ -1,10 +1,11 @@
 {
   "name": "css-syntax-parser",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A simple parser for MDN's \"CSS value definition syntax\"",
   "main": "index.js",
   "scripts": {
-    "build": "shx rm -R dist && shx mkdir dist && webpack",
+    "clean": "shx rm -R dist",
+    "build": "shx mkdir dist && webpack",
     "test": "ts-node test/test.ts"
   },
   "author": "zanomate",
