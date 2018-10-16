@@ -8,8 +8,9 @@ let resolveSyntax = require('css-syntax-parser');
 const syntax = resolveSyntax('[ <length> | <percentage> | auto ]{1,4}');
 
 console.log(syntax.type); // brackets
-console.log(syntax.multiplier.min); // 1 
-console.log(syntax.multiplier.max); // 4
+console.log(syntax.multiplier); // range
+console.log(syntax.range.min); // 1 
+console.log(syntax.range.max); // 4
 
 let content = syntax.multiplier.content;
 console.log(content.type); // composed 
