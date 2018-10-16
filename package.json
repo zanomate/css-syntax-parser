@@ -1,0 +1,21 @@
+{
+  "name": "css-syntax-parser",
+  "version": "1.0.0",
+  "description": "A simple parser for MDN's \"CSS value definition syntax\"",
+  "main": "index.js",
+  "scripts": {
+    "build": "shx rm -R dist && shx mkdir dist && webpack",
+    "test": "ts-node test/test.ts"
+  },
+  "author": "zanomate",
+  "license": "ISC",
+  "devDependencies": {
+    "copy-webpack-plugin": "^4.5.3",
+    "shx": "^0.3.2",
+    "ts-loader": "^5.2.2",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.3",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
+  }
+}

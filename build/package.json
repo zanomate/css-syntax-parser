@@ -1,0 +1,24 @@
+{
+  "name": "css-syntax-parser",
+  "version": "1.0.0",
+  "description": "A simple parser for MDN's \"CSS value definition syntax\"",
+  "author": "zanomate",
+  "license": "ISC",
+  "homepage": "https://github.com/zanomate/css-syntax-parser#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zanomate/css-syntax-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zanomate/css-syntax-parser/issues"
+  },
+  "keywords": [
+    "css",
+    "mdn",
+    "syntax",
+    "parser"
+  ],
+  "bundleDependencies": false,
+  "main": "./css-syntax-parser.js",
+  "types": "./types"
+}
