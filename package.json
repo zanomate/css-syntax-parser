@@ -1,6 +1,6 @@
 {
   "name": "css-syntax-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple parser for MDN's \"CSS value definition syntax\"",
   "main": "index.js",
   "scripts": {

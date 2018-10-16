@@ -12,7 +12,7 @@ console.log(syntax.multiplier); // range
 console.log(syntax.range.min); // 1 
 console.log(syntax.range.max); // 4
 
-let content = syntax.multiplier.content;
+let content = syntax.content;
 console.log(content.type); // composed 
 console.log(content.combinator); // |
 
