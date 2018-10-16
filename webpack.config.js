@@ -11,7 +11,8 @@ module.exports = {
         filename: 'css-syntax-parser.js',
         libraryTarget: 'umd',
         library: 'css-syntax-parser',
-        umdNamedDefine: true
+        umdNamedDefine: true,
+        globalObject: 'typeof self !== \'undefined\' ? self : this'
     },
     resolve: {
         extensions: ['.ts']

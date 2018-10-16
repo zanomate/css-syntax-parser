@@ -1,42 +1,42 @@
 import {
-    SyntaxAtomicTerm, SyntaxBrackets, SyntaxCombinator, SyntaxComposedTerm, SyntaxDataType, SyntaxKeyword, SyntaxLiteral, SyntaxLiteralSymbol, SyntaxMethod, SyntaxMultiplier,
-    SyntaxRange, SyntaxTerm
+    AtomicTerm, BracketsTerm, TermCombinator, ComposedTerm, DataTypeTerm, KeywordTerm, LiteralTerm, Literal, MethodTerm, TermMultiplier,
+    TermRange, Term
 } from './model';
 import { doubleAmpersandIndexes, doubleBarIndexes, findEnd, makeMask, singleBarIndexes, spacesIndexes } from './utils';
 
-export function resolveSyntax(predicate: string): SyntaxTerm {
+export function resolveSyntax(predicate: string): Term {
     predicate = predicate.trim();
     let masked = mask(predicate);
 
-    let combinator: SyntaxCombinator;
+    let combinator: TermCombinator;
     let points: number[];
     points = singleBarIndexes(masked);
     if (points.length) {
-        combinator = SyntaxCombinator.EXACTLY_ONE;
+        combinator = TermCombinator.EXACTLY_ONE;
     }
     else {
         points = doubleBarIndexes(masked);
         if (points.length) {
-            combinator = SyntaxCombinator.AT_LEAST_ONE;
+            combinator = TermCombinator.AT_LEAST_ONE;
         }
         else {
             points = doubleAmpersandIndexes(masked);
             if (points.length) {
-                combinator = SyntaxCombinator.MANDATORY_ANY_ORDER;
+                combinator = TermCombinator.MANDATORY_ANY_ORDER;
             }
             else {
                 points = spacesIndexes(masked);
                 if (points.length) {
-                    combinator = SyntaxCombinator.MANDATORY_EXACT_ORDER;
+                    combinator = TermCombinator.MANDATORY_EXACT_ORDER;
                 }
             }
         }
     }
 
     if (combinator != null) {
-        let term = new SyntaxComposedTerm(predicate);
+        let term = new ComposedTerm(predicate);
         term.combinator = combinator;
-        let parts = split(predicate, points, <SyntaxCombinator>combinator);
+        let parts = split(predicate, points, <TermCombinator>combinator);
 
         for (let part of parts) {
             term.children.push(resolveSyntax(part));
@@ -71,19 +71,19 @@ function maskBy(predicate: string, open: string, close: string): string {
 
 /* SPLIT */
 
-function split(predicate: string, splitPoints: number[], combinator: SyntaxCombinator): string[] {
+function split(predicate: string, splitPoints: number[], combinator: TermCombinator): string[] {
     let step = 0;
     switch (combinator) {
-        case SyntaxCombinator.MANDATORY_EXACT_ORDER:
+        case TermCombinator.MANDATORY_EXACT_ORDER:
             step = 1;
             break;
-        case SyntaxCombinator.MANDATORY_ANY_ORDER:
+        case TermCombinator.MANDATORY_ANY_ORDER:
             step = 2;
             break;
-        case SyntaxCombinator.AT_LEAST_ONE:
+        case TermCombinator.AT_LEAST_ONE:
             step = 2;
             break;
-        case SyntaxCombinator.EXACTLY_ONE:
+        case TermCombinator.EXACTLY_ONE:
             step = 1;
             break;
         default:
@@ -102,35 +102,35 @@ function split(predicate: string, splitPoints: number[], combinator: SyntaxCombi
 
 const isRange = /{([0-9]+),([0-9]+)}$/;
 
-function analyze(predicate: string): SyntaxAtomicTerm {
+function analyze(predicate: string): AtomicTerm {
     let value: string;
-    let multiplier: SyntaxMultiplier;
-    let range: SyntaxRange;
+    let multiplier: TermMultiplier;
+    let range: TermRange;
     let match;
 
     // MULTIPLIER
     if (predicate.endsWith('*')) {
-        multiplier = SyntaxMultiplier.ZERO_OR_MORE;
+        multiplier = TermMultiplier.ZERO_OR_MORE;
         value = predicate.slice(0, -1).trim();
     }
     else if (predicate.endsWith('+')) {
-        multiplier = SyntaxMultiplier.ONE_OR_MORE;
+        multiplier = TermMultiplier.ONE_OR_MORE;
         value = predicate.slice(0, -1).trim();
     }
     else if (predicate.endsWith('?')) {
-        multiplier = SyntaxMultiplier.OPTIONAL;
+        multiplier = TermMultiplier.OPTIONAL;
         value = predicate.slice(0, -1).trim();
     }
     else if (predicate.endsWith('#')) {
-        multiplier = SyntaxMultiplier.ARRAY;
+        multiplier = TermMultiplier.ARRAY;
         value = predicate.slice(0, -1).trim();
     }
     else if (predicate.endsWith('!')) {
-        multiplier = SyntaxMultiplier.REQUIRED;
+        multiplier = TermMultiplier.REQUIRED;
         value = predicate.slice(0, -1).trim();
     }
     else if ((match = isRange.exec(predicate)) !== null) {
-        multiplier = SyntaxMultiplier.RANGE;
+        multiplier = TermMultiplier.RANGE;
         range = {};
         if (match[1]) {
             range.min = parseInt(match[1]);
@@ -151,7 +151,7 @@ function analyze(predicate: string): SyntaxAtomicTerm {
         if (!value.endsWith(']')) {
             throw new Error('Malformed brackets');
         }
-        term = new SyntaxBrackets(predicate);
+        term = new BracketsTerm(predicate);
         term.content = resolveSyntax(value.slice(1, -1));
     }
     // DATA TYPE
@@ -159,7 +159,7 @@ function analyze(predicate: string): SyntaxAtomicTerm {
         if (!value.endsWith('>')) {
             throw new Error('Malformed data type');
         }
-        term = new SyntaxDataType(predicate);
+        term = new DataTypeTerm(predicate);
         let name = value.slice(1, -1);
         if (name.startsWith('\'')) {
             if (!name.endsWith('\'')) {
@@ -175,8 +175,8 @@ function analyze(predicate: string): SyntaxAtomicTerm {
     }
     else {
         // LITERAL
-        if (Object.values(SyntaxLiteralSymbol).includes(value)) {
-            term = new SyntaxLiteral(predicate);
+        if (Object.values(Literal).includes(value)) {
+            term = new LiteralTerm(predicate);
         }
         // METHOD
         else if (value.includes('(')) {
@@ -184,7 +184,7 @@ function analyze(predicate: string): SyntaxAtomicTerm {
                 throw new Error('Malformed method');
             }
             let openBrace = value.indexOf('(');
-            term = new SyntaxMethod(predicate);
+            term = new MethodTerm(predicate);
             term.name = value.substr(0, openBrace);
 
             let params = value.slice(openBrace + 1, -1);
@@ -194,7 +194,7 @@ function analyze(predicate: string): SyntaxAtomicTerm {
         }
         // KEYWORD
         else {
-            term = new SyntaxKeyword(predicate);
+            term = new KeywordTerm(predicate);
         }
     }
 

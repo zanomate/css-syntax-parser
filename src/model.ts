@@ -1,6 +1,6 @@
 /* VALUES */
 
-export enum SyntaxTermType {
+export enum TermType {
     LITERAL = 'literal',
     KEYWORD = 'keyword',
     METHOD = 'method',
@@ -9,95 +9,95 @@ export enum SyntaxTermType {
     BRACKETS = 'brackets'
 }
 
-export enum SyntaxLiteralSymbol {
+export enum Literal {
     SLASH = '/',
     COMMA = ',',
 }
 
-export enum SyntaxCombinator {
-    MANDATORY_EXACT_ORDER = ' ',
-    MANDATORY_ANY_ORDER = '&&',
-    AT_LEAST_ONE = '||',
-    EXACTLY_ONE = '|'
+export enum TermCombinator {
+    MANDATORY_EXACT_ORDER = 'mandatory exact order',
+    MANDATORY_ANY_ORDER = 'mandatory any order',
+    AT_LEAST_ONE = 'at least one',
+    EXACTLY_ONE = 'exactly one'
 }
 
-export enum SyntaxMultiplier {
-    ZERO_OR_MORE = '*',
-    ONE_OR_MORE = '+',
-    OPTIONAL = '?',
-    RANGE = '{}',
-    ARRAY = '#',
-    REQUIRED = '!',
+export enum TermMultiplier {
+    ZERO_OR_MORE = 'zero or more',
+    ONE_OR_MORE = 'one or more',
+    OPTIONAL = 'optional',
+    RANGE = 'range',
+    ARRAY = 'array',
+    REQUIRED = 'required',
 }
 
-export interface SyntaxRange {
+export interface TermRange {
     min?: number,
     max?: number
 }
 
 /* TERMS */
 
-export class SyntaxTerm {
+export class Term {
     readonly _value: string;
-    readonly type: SyntaxTermType;
+    readonly type: TermType;
 
-    constructor(type: SyntaxTermType, _value: string) {
+    constructor(type: TermType, _value: string) {
         this._value = _value;
         this.type = type;
     }
 }
 
-export class SyntaxComposedTerm extends SyntaxTerm {
-    combinator: SyntaxCombinator;
-    children: SyntaxTerm[] = [];
+export class ComposedTerm extends Term {
+    combinator: TermCombinator;
+    children: Term[] = [];
 
     constructor(_value: string) {
-        super(SyntaxTermType.COMPOSED, _value);
+        super(TermType.COMPOSED, _value);
     }
 }
 
-export class SyntaxAtomicTerm extends SyntaxTerm {
-    multiplier: SyntaxMultiplier;
-    range?: SyntaxRange;
+export class AtomicTerm extends Term {
+    multiplier: TermMultiplier;
+    range?: TermRange;
 }
 
 /* ATOMIC TERMS */
 
-export class SyntaxLiteral extends SyntaxAtomicTerm {
+export class LiteralTerm extends AtomicTerm {
     constructor(_value: string) {
-        super(SyntaxTermType.LITERAL, _value);
+        super(TermType.LITERAL, _value);
     }
 }
 
-export class SyntaxKeyword extends SyntaxAtomicTerm {
+export class KeywordTerm extends AtomicTerm {
     constructor(_value: string) {
-        super(SyntaxTermType.KEYWORD, _value);
+        super(TermType.KEYWORD, _value);
     }
 }
 
-export class SyntaxMethod extends SyntaxAtomicTerm {
+export class MethodTerm extends AtomicTerm {
     name: string;
-    params: SyntaxTerm;
+    params: Term;
 
     constructor(_value: string) {
-        super(SyntaxTermType.METHOD, _value);
+        super(TermType.METHOD, _value);
     }
 }
 
-export class SyntaxDataType extends SyntaxAtomicTerm {
+export class DataTypeTerm extends AtomicTerm {
     name: string;
     nonTerminal: boolean;
 
     constructor(_value: string) {
-        super(SyntaxTermType.DATA_TYPE, _value);
+        super(TermType.DATA_TYPE, _value);
     }
 }
 
-export class SyntaxBrackets extends SyntaxAtomicTerm {
-    content: SyntaxTerm;
+export class BracketsTerm extends AtomicTerm {
+    content: Term;
 
     constructor(_value: string) {
-        super(SyntaxTermType.BRACKETS, _value);
+        super(TermType.BRACKETS, _value);
     }
 }
 

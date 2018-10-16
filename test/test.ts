@@ -1,9 +1,9 @@
-import { SyntaxAtomicTerm, SyntaxBrackets, SyntaxComposedTerm, SyntaxDataType, SyntaxKeyword, SyntaxLiteral, SyntaxMethod, resolveSyntax, SyntaxTerm } from '../src';
+import { AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, LiteralTerm, MethodTerm, resolveSyntax, Term } from '../src';
 
 let syntax = resolveSyntax(`[ <length> | <percentage> | auto ]{1,4}`);
 printTerm(syntax, 0);
 
-function printTerm(term: SyntaxTerm, indent: number) {
+function printTerm(term: Term, indent: number) {
     let indentation = '';
     if (indent > 0) {
         for (let i = 0; i < indent - 1; i++) {
@@ -12,29 +12,29 @@ function printTerm(term: SyntaxTerm, indent: number) {
         indentation += '> ';
     }
 
-    if (term instanceof SyntaxComposedTerm) {
-        printLine(indentation, '[Composed]', (<SyntaxComposedTerm>term)._value);
-        (<SyntaxComposedTerm>term).children.map(child => printTerm(child, indent + 1));
+    if (term instanceof ComposedTerm) {
+        printLine(indentation, '[Composed]', (<ComposedTerm>term)._value);
+        (<ComposedTerm>term).children.map(child => printTerm(child, indent + 1));
     }
-    else if (term instanceof SyntaxAtomicTerm) {
-        if (term instanceof SyntaxLiteral) {
-            printLine(indentation, '[Literal]', (<SyntaxLiteral>term)._value);
+    else if (term instanceof AtomicTerm) {
+        if (term instanceof LiteralTerm) {
+            printLine(indentation, '[Literal]', (<LiteralTerm>term)._value);
         }
-        else if (term instanceof SyntaxKeyword) {
-            printLine(indentation, '[Keyword]', (<SyntaxKeyword>term)._value);
+        else if (term instanceof KeywordTerm) {
+            printLine(indentation, '[Keyword]', (<KeywordTerm>term)._value);
         }
-        else if (term instanceof SyntaxDataType) {
-            printLine(indentation, '[DataType]', (<SyntaxLiteral>term)._value);
+        else if (term instanceof DataTypeTerm) {
+            printLine(indentation, '[DataType]', (<LiteralTerm>term)._value);
         }
-        else if (term instanceof SyntaxMethod) {
-            printLine(indentation, '[Method]', (<SyntaxLiteral>term)._value);
-            if ((<SyntaxMethod>term).params) {
-                printTerm((<SyntaxMethod>term).params, indent + 1)
+        else if (term instanceof MethodTerm) {
+            printLine(indentation, '[Method]', (<LiteralTerm>term)._value);
+            if ((<MethodTerm>term).params) {
+                printTerm((<MethodTerm>term).params, indent + 1)
             }
         }
-        else if (term instanceof SyntaxBrackets) {
-            printLine(indentation, 'BRACKETS', (<SyntaxLiteral>term)._value);
-            printTerm((<SyntaxBrackets>term).content, indent + 1);
+        else if (term instanceof BracketsTerm) {
+            printLine(indentation, 'BRACKETS', (<LiteralTerm>term)._value);
+            printTerm((<BracketsTerm>term).content, indent + 1);
         }
     }
     else {
