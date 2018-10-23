@@ -1,7 +1,14 @@
-import { AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, LiteralTerm, MethodTerm, resolveSyntax, Term } from '../src';
+import {
+    AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, LiteralTerm, MethodTerm, resolveSyntax,
+    resolveSyntaxByName, Term
+} from '../src';
 
-let syntax = resolveSyntax(`[ <length> | <percentage> | auto ]{1,4}`);
-printTerm(syntax, 0);
+const syntax = "[ <length> | <percentage> | auto ]{1,4}";
+// let term = resolveSyntax(syntax);
+// let term = resolveSyntax(syntax, true);
+// let term = resolveSyntaxByName('display');
+let term = resolveSyntaxByName('display', true);
+printTerm(term, 0);
 
 function printTerm(term: Term, indent: number) {
     let indentation = '';

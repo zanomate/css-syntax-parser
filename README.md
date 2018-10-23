@@ -67,6 +67,13 @@ if (syntax.type === TermType.BRACKETS) {
 }
 ```
 
+## Methods
+
+| Method |
+| --- |
+| `resolveSyntax(syntax, recursive?)` |
+| `resolveSyntaxByName(propertyName, recursive?)` |
+
 ## Terms
 
 | Type | Samples |

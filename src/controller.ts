@@ -1,10 +1,15 @@
+import { MDN } from './data';
 import {
-    AtomicTerm, BracketsTerm, TermCombinator, ComposedTerm, DataTypeTerm, KeywordTerm, LiteralTerm, Literal, MethodTerm, TermMultiplier,
-    TermRange, Term
+    AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, Literal, LiteralTerm, MethodTerm, Term,
+    TermCombinator, TermMultiplier, TermRange
 } from './model';
 import { doubleAmpersandIndexes, doubleBarIndexes, findEnd, makeMask, singleBarIndexes, spacesIndexes } from './utils';
 
-export function resolveSyntax(predicate: string): Term {
+export function resolveSyntaxByName(propertyName: string, recursive?: boolean): Term {
+    return resolveSyntax(MDN.Properties[propertyName], recursive);
+}
+
+export function resolveSyntax(predicate: string, recursive?: boolean): Term {
     predicate = predicate.trim();
     let masked = mask(predicate);
 
@@ -39,12 +44,12 @@ export function resolveSyntax(predicate: string): Term {
         let parts = split(predicate, points, <TermCombinator>combinator);
 
         for (let part of parts) {
-            term.children.push(resolveSyntax(part));
+            term.children.push(resolveSyntax(part, recursive));
         }
         return term;
     }
     else {
-        return analyze(predicate);
+        return analyze(predicate, recursive);
     }
 }
 
@@ -102,7 +107,7 @@ function split(predicate: string, splitPoints: number[], combinator: TermCombina
 
 const isRange = /{([0-9]+),([0-9]+)}$/;
 
-function analyze(predicate: string): AtomicTerm {
+function analyze(predicate: string, recursive?: boolean): AtomicTerm {
     let value: string;
     let multiplier: TermMultiplier;
     let range: TermRange;
@@ -144,7 +149,7 @@ function analyze(predicate: string): AtomicTerm {
         value = predicate;
     }
 
-    let term;
+    let term: AtomicTerm;
 
     // BRACKETS
     if (value.startsWith('[')) {
@@ -152,7 +157,7 @@ function analyze(predicate: string): AtomicTerm {
             throw new Error('Malformed brackets');
         }
         term = new BracketsTerm(predicate);
-        term.content = resolveSyntax(value.slice(1, -1));
+        (<BracketsTerm>term).content = resolveSyntax(value.slice(1, -1), recursive);
     }
     // DATA TYPE
     else if (value.startsWith('<')) {
@@ -165,12 +170,19 @@ function analyze(predicate: string): AtomicTerm {
             if (!name.endsWith('\'')) {
                 throw new Error('Malformed data type name');
             }
-            term.name = name.slice(1, -1);
-            term.nonTerminal = true;
+            (<DataTypeTerm>term).name = name.slice(1, -1);
+            (<DataTypeTerm>term).nonTerminal = true;
         }
         else {
-            term.name = name;
-            term.nonTerminal = false;
+            (<DataTypeTerm>term).name = name;
+            (<DataTypeTerm>term).nonTerminal = false;
+        }
+
+        if (recursive) {
+            const recursiveSource = (<DataTypeTerm>term).nonTerminal ? MDN.Properties : MDN.Syntaxes;
+            const recursiveSyntax = recursiveSource[(<DataTypeTerm>term).name];
+            term = new BracketsTerm(recursiveSyntax);
+            (<BracketsTerm>term).content = resolveSyntax(recursiveSyntax, recursive);
         }
     }
     else {
@@ -185,11 +197,11 @@ function analyze(predicate: string): AtomicTerm {
             }
             let openBrace = value.indexOf('(');
             term = new MethodTerm(predicate);
-            term.name = value.substr(0, openBrace);
+            (<MethodTerm>term).name = value.substr(0, openBrace);
 
             let params = value.slice(openBrace + 1, -1);
             if (params.length) {
-                term.params = resolveSyntax(params);
+                (<MethodTerm>term).params = resolveSyntax(params, recursive);
             }
         }
         // KEYWORD
