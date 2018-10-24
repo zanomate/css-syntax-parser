@@ -1,15 +1,6 @@
 export function makeMask(length: number) {
-    let mask = '';
-    for (let i = 0; i < length; i++) {
-        mask += '_';
-    }
-    return mask;
+    return new Array(length).fill('_').join('')
 }
-
-export const singleBarIndexes = (predicate: string) => allIndexes(predicate, /\|/);
-export const doubleBarIndexes = (predicate: string) => allIndexes(predicate, /\|\|/);
-export const doubleAmpersandIndexes = (predicate: string) => allIndexes(predicate, /&&/);
-export const spacesIndexes = (predicate: string) => allIndexes(predicate, /\s+/);
 
 const illegalCharacter = ['|', '&'];
 
@@ -37,19 +28,19 @@ export function allIndexes(predicate: string, search: RegExp) {
 }
 
 export function findEnd(predicate: string, start: number, bracketOpen: string, bracketClose: string): number {
-    predicate = predicate.substr(start);
-    if (!predicate.startsWith(bracketOpen)) {
-        throw new Error('malformed predicate: ' + predicate);
+    let pred = predicate.substr(start);
+    if (!pred.startsWith(bracketOpen)) {
+        throw new Error('malformed predicate: ' + pred);
     }
     let bracketsToClose: number = 1;
     let lastBracket = 0;
     while (bracketsToClose) {
-        let nextClose = predicate.indexOf(bracketClose, lastBracket + 1);
+        let nextClose = pred.indexOf(bracketClose, lastBracket + 1);
         if (nextClose == -1) {
-            throw new Error('malformed predicate: ' + predicate);
+            throw new Error('malformed predicate: ' + pred);
         }
 
-        let nextOpen = predicate.indexOf(bracketOpen, lastBracket + 1);
+        let nextOpen = (bracketOpen !== bracketClose) ? pred.indexOf(bracketOpen, lastBracket + 1) : -1;
         if (nextOpen == -1 || nextOpen > nextClose) {
             bracketsToClose--;
             lastBracket = nextClose;
@@ -60,4 +51,22 @@ export function findEnd(predicate: string, start: number, bracketOpen: string, b
         }
     }
     return start + lastBracket;
+}
+
+export function mask(predicate: string, open: string, close: string): string {
+    let start;
+    let last = 0;
+    while ((start = predicate.indexOf(open, last)) >= 0) {
+        const end = findEnd(predicate, start, open, close);
+        predicate = predicate.substr(0, start + 1) + makeMask(end - start - 1) + predicate.substr(end);
+        last = end + 1;
+    }
+    return predicate;
+}
+
+export function indent(indentation: number) {
+    if(!indentation) {
+        return "";
+    }
+    return new Array(indentation).fill('.  ').join('');
 }
