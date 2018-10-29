@@ -127,85 +127,528 @@ if (syntax.type === TermType.BRACKETS) {
 ## Recursive resolve
 
 ```js
-let resolveSyntax = require('css-syntax-parser');
+let { resolveSyntaxByName } = require('css-syntax-parser');
 
-const syntax = resolveSyntax('[ <length> | <percentage> | auto ]{1,4}', true);
+const syntax = resolveSyntaxByName('grid', true);
 
 syntax.print();
 
 // COMPOSED
 // -combinator: |
-// .  DATA TYPE
-//     .  -name: grid-template
-//     .  -non-terminal: true
-//     .
-//     .  COMPOSED
-//     .  -combinator:
-// .  .  DATA TYPE
-//     .  .  -name: grid-template-rows
-//     .  .  -non-terminal: true
-//     .  .
-//     .  .  LITERAL
-//     .  .  -value: /
-// .  .
-// .  .  [
-//     .  .  .  COMPOSED
-//     .  .  .  -combinator: &&
-// .  .  .  .  KEYWORD
-//     .  .  .  .  -value: auto-flow
-//     .  .  .  .
-//     .  .  .  .  KEYWORD
-//     .  .  .  .  -value: dense
-//     .  .  .  .  -multiplier: ?
-// .  .  .  .
-// .  .  ]
-// .  .
-// .  .  DATA TYPE
-//     .  .  -name: grid-auto-columns
-//     .  .  -non-terminal: true
-//     .  .  -multiplier: ?
-// .  .
+// .  [
+// .  .  COMPOSED
+// .  .  -combinator: |
+// .  .  .  KEYWORD
+// .  .  .  -value: none
+// .  .  .  
+// .  .  .  [
+// .  .  .  .  COMPOSED
+// .  .  .  .  -combinator:  
+// .  .  .  .  .  [
+// .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  -value: none
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  STRING
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -value: [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -name: custom-ident
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: *
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  STRING
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: length
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: percentage
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: flex
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: min-content
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: max-content
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: auto
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name minmax
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: length
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: percentage
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: min-content
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: max-content
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: auto
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: track-breadth
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name fit-content
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: length
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: percentage
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name repeat
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: positive-integer
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: track-size
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: +
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  -multiplier: +
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: length-percentage
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name minmax
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-breadth
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: track-breadth
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name minmax
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: inflexible-breadth
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-breadth
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name repeat
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: positive-integer
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-size
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: +
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  -multiplier: *
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  METHOD
+// .  .  .  .  .  .  .  .  .  .  -name repeat
+// .  .  .  .  .  .  .  .  .  .  (
+// .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: auto-fill
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -value: auto-fit
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  .  .  .  .  .  .  -value: ,
+// .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-size
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: +
+// .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  )
+// .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-size
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -name: fixed-repeat
+// .  .  .  .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  .  -multiplier: *
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  ]
+// .  .  .  .  .  
+// .  .  .  .  .  LITERAL
+// .  .  .  .  .  -value: /
+// .  .  .  .  .  
+// .  .  .  .  .  [
+// .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  -combinator: |
+// .  .  .  .  .  .  .  KEYWORD
+// .  .  .  .  .  .  .  -value: none
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  -name: track-list
+// .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  -name: auto-track-list
+// .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  
+// .  .  .  .  .  ]
+// .  .  .  .  .  
+// .  .  .  ]
+// .  .  .  
+// .  .  .  COMPOSED
+// .  .  .  -combinator:  
+// .  .  .  .  [
+// .  .  .  .  .  COMPOSED
+// .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  
+// .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  -name: string
+// .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  
+// .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  -name: track-size
+// .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  
+// .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  
+// .  .  .  .  ]
+// .  .  .  .  -multiplier: +
+// .  .  .  .  
+// .  .  .  .  [
+// .  .  .  .  .  COMPOSED
+// .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  LITERAL
+// .  .  .  .  .  .  -value: /
+// .  .  .  .  .  .  
+// .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  [
+// .  .  .  .  .  .  .  .  .  COMPOSED
+// .  .  .  .  .  .  .  .  .  -combinator:  
+// .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  .  .  -name: track-size
+// .  .  .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  ]
+// .  .  .  .  .  .  .  .  -multiplier: +
+// .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  .  .  DATA TYPE
+// .  .  .  .  .  .  .  .  -name: line-names
+// .  .  .  .  .  .  .  .  -non-terminal: false
+// .  .  .  .  .  .  .  .  -multiplier: ?
+// .  .  .  .  .  .  .  .  
+// .  .  .  .  .  .  ]
+// .  .  .  .  .  .  
+// .  .  .  .  ]
+// .  .  .  .  -multiplier: ?
+// .  .  .  .  
+// .  ]
+// .  
 // .  COMPOSED
-//     .  -combinator:
-// .  .  [
-//     .  .  .  COMPOSED
-//     .  .  .  -combinator: &&
-// .  .  .  .  KEYWORD
-//     .  .  .  .  -value: auto-flow
-//     .  .  .  .
-//     .  .  .  .  KEYWORD
-//     .  .  .  .  -value: dense
-//     .  .  .  .  -multiplier: ?
-// .  .  .  .
-// .  .  ]
-// .  .
+// .  -combinator:  
 // .  .  DATA TYPE
-//     .  .  -name: grid-auto-rows
-//     .  .  -non-terminal: true
-//     .  .  -multiplier: ?
-// .  .
+// .  .  -name: grid-template-rows
+// .  .  -non-terminal: true
+// .  .  
 // .  .  LITERAL
-//     .  .  -value: /
-// .  .
+// .  .  -value: /
+// .  .  
+// .  .  [
+// .  .  .  COMPOSED
+// .  .  .  -combinator: &&
+// .  .  .  .  KEYWORD
+// .  .  .  .  -value: auto-flow
+// .  .  .  .  
+// .  .  .  .  KEYWORD
+// .  .  .  .  -value: dense
+// .  .  .  .  -multiplier: ?
+// .  .  .  .  
+// .  .  ]
+// .  .  
+// .  .  [
+// .  .  .  DATA TYPE
+// .  .  .  -name: track-size
+// .  .  .  -non-terminal: false
+// .  .  .  -multiplier: +
+// .  .  .  
+// .  .  ]
+// .  .  -multiplier: ?
+// .  .  
+// .  COMPOSED
+// .  -combinator:  
+// .  .  [
+// .  .  .  COMPOSED
+// .  .  .  -combinator: &&
+// .  .  .  .  KEYWORD
+// .  .  .  .  -value: auto-flow
+// .  .  .  .  
+// .  .  .  .  KEYWORD
+// .  .  .  .  -value: dense
+// .  .  .  .  -multiplier: ?
+// .  .  .  .  
+// .  .  ]
+// .  .  
+// .  .  [
+// .  .  .  DATA TYPE
+// .  .  .  -name: track-size
+// .  .  .  -non-terminal: false
+// .  .  .  -multiplier: +
+// .  .  .  
+// .  .  ]
+// .  .  -multiplier: ?
+// .  .  
+// .  .  LITERAL
+// .  .  -value: /
+// .  .  
 // .  .  DATA TYPE
-//     .  .  -name: grid-template-columns
-//     .  .  -non-terminal: true
-//     .  .
-//     [
-//     .  COMPOSED
-//     .  -combinator: |
-// .  .  DATA TYPE
-//     .  .  -name: length
-//     .  .  -non-terminal: false
-//     .  .
-//     .  .  DATA TYPE
-//     .  .  -name: percentage
-//     .  .  -non-terminal: false
-//     .  .
-//     .  .  KEYWORD
-//     .  .  -value: auto
-//     .  .
-// ]
-// -multiplier: {range}
-// -range: { min: 1, max: 4 }
+// .  .  -name: grid-template-columns
+// .  .  -non-terminal: true
+// .  .  
 ```

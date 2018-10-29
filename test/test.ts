@@ -6,4 +6,4 @@ resolveSyntax(syntax, false).print();
 
 console.log('\n\nresolveSyntaxByName\n');
 const propertyName = 'grid';
-resolveSyntaxByName(propertyName).print();
+resolveSyntaxByName(propertyName, true).print();

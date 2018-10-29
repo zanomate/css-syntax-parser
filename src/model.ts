@@ -5,6 +5,7 @@ import { indent } from './utils';
 export enum TermType {
     LITERAL = 'literal',
     KEYWORD = 'keyword',
+    STRING = 'string',
     METHOD = 'method',
     DATA_TYPE = 'data-type',
     COMPOSED = 'composed',
@@ -102,6 +103,19 @@ export class KeywordTerm extends AtomicTerm {
 
     print(indentation: number = 0): void {
         console.log(indent(indentation) + 'KEYWORD');
+        console.log(indent(indentation) + '-value:', this._value);
+        super.print(indentation);
+        console.log(indent(indentation));
+    }
+}
+
+export class StringTerm extends AtomicTerm {
+    constructor(_value: string) {
+        super(TermType.STRING, _value);
+    }
+
+    print(indentation: number = 0): void {
+        console.log(indent(indentation) + 'STRING');
         console.log(indent(indentation) + '-value:', this._value);
         super.print(indentation);
         console.log(indent(indentation));

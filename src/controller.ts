@@ -1,7 +1,7 @@
 import { MDN } from './data';
 import {
-    AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, Literal, LiteralTerm, MethodTerm, Term,
-    TermCombinator, TermMultiplier, TermRange
+    AtomicTerm, BracketsTerm, ComposedTerm, DataTypeTerm, KeywordTerm, Literal, LiteralTerm, MethodTerm, StringTerm,
+    Term, TermCombinator, TermMultiplier, TermRange
 } from './model';
 import { allIndexes, mask } from './utils';
 
@@ -62,7 +62,7 @@ export class Resolver {
     private static findCombinator(predicate: string): TermCombinator {
 
         // Single bar
-        let maskedPredicate = predicate.replace('||', '  ');
+        let maskedPredicate = predicate.replace(/\|\|/g, '  ');
         if (maskedPredicate.includes('|'))
             return TermCombinator.SINGLE_BAR;
 
@@ -198,6 +198,13 @@ export class Resolver {
                     (<BracketsTerm>term).content = this.resolvePredicate(recursiveSyntax);
                 }
             }
+        }
+        else if (predicate.startsWith('\'')) {
+            if (!predicate.endsWith('\'')) {
+                throw new Error('malformed string');
+            }
+            let value = predicate.slice(1, -1);
+            term = new StringTerm(value);
         }
         // Method
         else if (predicate.includes('(')) {
